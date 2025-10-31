@@ -1,0 +1,33 @@
+FROM node:22
+
+WORKDIR /app
+
+# Set Node.js memory limit (optimized for 6GB WSL)
+ENV NODE_OPTIONS="--max-old-space-size=3072"
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN npm install
+
+# Generate Prisma clients (optimized memory usage)
+RUN NODE_OPTIONS="--max-old-space-size=3072" npx prisma generate --schema prisma/schema/citizens/schema.prisma
+RUN NODE_OPTIONS="--max-old-space-size=3072" npx prisma generate --schema prisma/schema/baybank/schema.prisma
+RUN NODE_OPTIONS="--max-old-space-size=3072" npx prisma generate --schema prisma/schema/oasisbank/schema.prisma
+RUN NODE_OPTIONS="--max-old-space-size=3072" npx prisma generate --schema prisma/schema/zenbank/schema.prisma
+RUN NODE_OPTIONS="--max-old-space-size=3072" npx prisma generate --schema prisma/schema/arcbank/schema.prisma
+RUN NODE_OPTIONS="--max-old-space-size=3072" npx prisma generate --schema prisma/schema/nexbank/schema.prisma
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# ⚡ START IN DEV MODE - NO BUILD! Uses tsx for instant TypeScript execution
+CMD ["npm", "run", "dev"]
+
+
+

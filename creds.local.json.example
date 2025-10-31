@@ -1,0 +1,34 @@
+{
+  "jwtSecret": "CHANGE_THIS_SECRET_KEY_TO_32_CHAR_STRING",
+  "aesKey": "CHANGE_THIS_TO_BASE64_ENCODED_32_BYTE_KEY",
+  "nniSalt": "CHANGE_THIS_TO_RANDOM_SALT",
+  "openaiApiKey": "sk-CHANGE_THIS_TO_YOUR_OPENAI_API_KEY",
+  "hedera": {
+    "operatorId": "0.0.CHANGE_THIS",
+    "operatorKey": "CHANGE_THIS_TO_YOUR_HEDERA_PRIVATE_KEY",
+    "topicId": "0.0.CHANGE_THIS",
+    "network": "testnet"
+  },
+  "database": {
+    "citizens": "postgresql://postgres:postgres@localhost:5432/citizens_db",
+    "baybank": "postgresql://postgres:postgres@localhost:5433/baybank_db",
+    "oasisbank": "postgresql://postgres:postgres@localhost:5433/oasisbank_db",
+    "ZenBank": "postgresql://postgres:postgres@localhost:5433/ZenBank_db",
+    "ArcBank": "postgresql://postgres:postgres@localhost:5433/ArcBank_db",
+    "NexBank": "postgresql://postgres:postgres@localhost:5433/NexBank_db"
+  },
+  "minio": {
+    "endpoint": "localhost",
+    "port": 9000,
+    "accessKey": "minioadmin",
+    "secretKey": "minioadmin",
+    "useSSL": false
+  },
+  "redis": {
+    "url": "redis://localhost:6379"
+  },
+  "faceRecognition": {
+    "threshold": 0.90,
+    "embeddingDims": 512
+  }
+}

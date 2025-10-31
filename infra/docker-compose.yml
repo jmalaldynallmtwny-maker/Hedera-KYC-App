@@ -1,0 +1,182 @@
+version: '3.8'
+services:
+  postgres-citizens:
+    image: postgres:15
+    container_name: postgres-citizens
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citizens_db
+      # Memory optimization for 6GB WSL
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 16MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_citizens_data:/var/lib/postgresql/data
+      - ./init-db/init-citizens-db.sql:/docker-entrypoint-initdb.d/init-citizens-db.sql
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kyc-network
+
+  postgres-banks:
+    image: postgres:15
+    container_name: postgres-banks
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      # Memory optimization for 6GB WSL
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 16MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_banks_data:/var/lib/postgresql/data
+      - ./init-db/01-create-all-databases.sql:/docker-entrypoint-initdb.d/01-create-databases.sql
+      - ./init-db/init-bank-schema.sql:/docker-entrypoint-initdb.d/02-init-bank-schema.sql
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kyc-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-kyc
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --save 60 1000
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - kyc-network
+
+  minio:
+    image: minio/minio
+    container_name: minio-kyc
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/ready"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kyc-network
+
+  backend:
+    build: 
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    container_name: backend-kyc
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env.docker
+    environment:
+      # Override for Docker network (container names instead of localhost)
+      - NODE_ENV=development
+      - NODE_OPTIONS=--max-old-space-size=3072
+      - DATABASE_URL_CITIZENS=postgresql://postgres:postgres@postgres-citizens:5432/citizens_db
+      - DATABASE_URL_BAYBANK=postgresql://postgres:postgres@postgres-banks:5432/baybank_db
+      - DATABASE_URL_OASISBANK=postgresql://postgres:postgres@postgres-banks:5432/oasisbank_db
+      - DATABASE_URL_ZENBANK=postgresql://postgres:postgres@postgres-banks:5432/zenbank_db
+      - DATABASE_URL_ARCBANK=postgresql://postgres:postgres@postgres-banks:5432/arcbank_db
+      - DATABASE_URL_NEXBANK=postgresql://postgres:postgres@postgres-banks:5432/nexbank_db
+      - REDIS_URL=redis://redis-kyc:6379
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_USE_SSL=false
+      - MINIO_BUCKET=kyc-requests
+      - FRONTEND_URL=http://localhost:5173
+    volumes:
+      - ../backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres-citizens:
+        condition: service_healthy
+      postgres-banks:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '3.0'
+          memory: 4G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - kyc-network
+
+volumes:
+  postgres_citizens_data:
+  postgres_banks_data:
+  redis_data:
+  minio_data:
+
+networks:
+  kyc-network:
+    driver: bridge

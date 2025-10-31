@@ -1,0 +1,84 @@
+// Citizens Database Schema
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../src/generated/citizens"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_CITIZENS")
+}
+
+model Citizen {
+  // ===================================
+  // Primary Identification
+  // ===================================
+  id              String   @id @default(uuid())
+  nni_index       String   @unique    // Hashed NNI for lookup
+  nni_masked      String?             // Masked for display (e.g., 2001****89)
+  
+  // ===================================
+  // Personal Information
+  // ===================================
+  given_name      String?
+  family_name     String?
+  full_name       String?
+  gender          String?             // MALE, FEMALE, OTHER
+  birthdate       DateTime?
+  place_of_birth  String?
+  phone_number    String?
+  
+  // ===================================
+  // Biometric Data (Encrypted)
+  // ===================================
+  biometric_hash          String?     // SHA-256 hash of biometric data
+  face_data_encrypted     String?     // Encrypted face embeddings
+  face_iv                 String?     // Initialization vector for decryption
+  face_tag                String?     // Authentication tag for AES-GCM
+  
+  // ===================================
+  // Consent Management (GDPR Compliance)
+  // ===================================
+  consent_given           Boolean   @default(false)
+  consent_date            DateTime?
+  consent_version         String?   // Version of privacy policy agreed to
+  data_retention_until    DateTime? // When data should be deleted
+  
+  // ===================================
+  // KYC Tracking
+  // ===================================
+  kyc_status              String    @default("PENDING")  // PENDING, VERIFIED, REJECTED, EXPIRED
+  verification_attempts   Int       @default(0)
+  last_verification       DateTime?
+  verified_by             String?   // Admin/System who verified
+  verification_notes      String?   // Reason for rejection, etc.
+  
+  // ===================================
+  // Audit Trail
+  // ===================================
+  metadata                Json?     // Additional flexible data
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  created_by              String?   // System/Admin who created
+  updated_by              String?   // Last updater
+  
+  // ===================================
+  // Soft Delete Support
+  // ===================================
+  deleted_at              DateTime? // NULL = active, NOT NULL = deleted
+  deleted_by              String?   // Who deleted it
+
+  @@map("citizens")
+  
+  // ===================================
+  // Indexes for Performance
+  // ===================================
+  @@index([nni_index])                    // Primary lookup
+  @@index([kyc_status])                   // Filter by status
+  @@index([created_at])                   // Sort by date
+  @@index([consent_given])                // GDPR queries
+  @@index([deleted_at])                   // Exclude soft-deleted
+  @@index([kyc_status, created_at])       // Composite for dashboard
+  @@index([birthdate])                    // Age-based queries
+  @@index([data_retention_until])         // Data cleanup jobs
+}

@@ -1,0 +1,183 @@
+// Bank Database Schema - zenbank
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../src/generated/zenbank"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_ZENBANK")
+}
+
+model Admin {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  password_hash String
+  bank_id       String
+  face_enrolled Boolean   @default(false)
+  last_login    DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  // ===================================
+  // Soft Delete Support
+  // ===================================
+  deleted_at DateTime? // NULL = active, NOT NULL = deleted
+  deleted_by String? // Who deleted this admin
+
+  // Relations
+  admin_faces AdminFace[]
+  votes       Vote[]
+  sessions    Session[]
+
+  @@index([deleted_at]) // For filtering active admins
+  @@map("admins")
+}
+
+model AdminFace {
+  id             String   @id @default(uuid())
+  admin_id       String
+  enc_embedding  String
+  iv             String
+  tag            String
+  dims           Int
+  embedding_hash String?
+  enrolled_at    DateTime @default(now())
+
+  admin Admin @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+
+  @@index([admin_id])
+  @@map("admin_faces")
+}
+
+model PendingRequest {
+  id               String   @id @default(uuid())
+  citizen_nni_hash String
+  masked_nni       String
+  payload_summary  Json
+  status           String   @default("PENDING")
+  summary_hash     String?
+  salt_ref         String?
+  voting_deadline  DateTime
+  image_urls       Json?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  // ===================================
+  // Soft Delete Support
+  // ===================================
+  deleted_at DateTime?
+  deleted_by String?
+
+  // Relations
+  votes         Vote[]
+  hedera_proofs HederaProof[]
+
+  // ===================================
+  // Indexes for Performance
+  // ===================================
+  @@index([citizen_nni_hash])
+  @@index([status])
+  @@index([created_at])
+  @@index([voting_deadline]) // Find expiring requests
+  @@index([status, created_at]) // Dashboard queries (status + time)
+  @@index([status, voting_deadline]) // Active requests by deadline
+  @@index([citizen_nni_hash, status]) // Citizen-specific status
+  @@index([created_at, status]) // Recent requests by status
+  @@index([deleted_at]) // Exclude soft-deleted
+  @@map("pending_requests")
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  request_id String
+  bank_id    String
+  admin_id   String
+  vote       String
+  reason     String?
+  created_at DateTime @default(now())
+
+  // Relations
+  admin           Admin          @relation(fields: [admin_id], references: [id], onDelete: Restrict)
+  pending_request PendingRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@unique([request_id, bank_id, admin_id])
+  // ===================================
+  // Indexes for Performance
+  // ===================================
+  @@index([request_id])
+  @@index([bank_id])
+  @@index([admin_id]) // Votes by admin
+  @@index([created_at]) // Recent votes
+  @@index([bank_id, created_at]) // Bank vote history
+  @@index([vote]) // Filter by APPROVE/REJECT
+  @@map("votes")
+}
+
+model HederaProof {
+  id               String   @id @default(uuid())
+  request_id       String   @unique
+  summary_hash     String
+  topic_message_id String
+  created_at       DateTime @default(now())
+
+  pending_request PendingRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([topic_message_id])
+  @@index([created_at])
+  @@map("hedera_proofs")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  event_type String
+  meta_hash  String
+  details    Json?
+  created_at DateTime @default(now())
+
+  @@index([event_type])
+  @@index([created_at])
+  @@index([event_type, created_at]) // Composite for filtering
+  @@map("audit_logs")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  citizen_ref  String?
+  bank_id      String
+  activated_at DateTime?
+  metadata     Json?
+  created_at   DateTime  @default(now())
+
+  @@index([bank_id])
+  @@index([activated_at])
+  @@index([citizen_ref]) // Lookup by citizen
+  @@map("users")
+}
+
+model Session {
+  id            String    @id @default(uuid())
+  admin_id      String
+  bank_id       String
+  refresh_token String?
+  is_active     Boolean   @default(true)
+  user_agent    String?
+  ip_address    String?
+  last_activity DateTime  @default(now())
+  created_at    DateTime  @default(now())
+  ended_at      DateTime?
+
+  admin Admin @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+
+  // ===================================
+  // Indexes for Performance
+  // ===================================
+  @@index([admin_id])
+  @@index([is_active])
+  @@index([last_activity])
+  @@index([admin_id, is_active]) // Active sessions per admin
+  @@index([created_at]) // Recent sessions
+  @@index([bank_id, is_active]) // Active sessions per bank
+  @@index([is_active, last_activity]) // Cleanup stale sessions
+  @@map("sessions")
+}

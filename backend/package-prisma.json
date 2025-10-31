@@ -1,0 +1,12 @@
+{
+  "name": "prisma-generate",
+  "scripts": {
+    "generate": "npm run generate:citizens && npm run generate:baybank && npm run generate:oasisbank && npm run generate:ZenBank && npm run generate:ArcBank && npm run generate:NexBank",
+    "generate:citizens": "prisma generate --schema prisma/schema/citizens/schema.prisma",
+    "generate:baybank": "prisma generate --schema prisma/schema/baybank/schema.prisma",
+    "generate:oasisbank": "prisma generate --schema prisma/schema/oasisbank/schema.prisma",
+    "generate:ZenBank": "prisma generate --schema prisma/schema/ZenBank/schema.prisma",
+    "generate:ArcBank": "prisma generate --schema prisma/schema/ArcBank/schema.prisma",
+    "generate:NexBank": "prisma generate --schema prisma/schema/NexBank/schema.prisma"
+  }
+}

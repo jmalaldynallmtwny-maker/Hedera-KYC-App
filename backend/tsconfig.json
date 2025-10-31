@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    
+    // ===================================
+    // Type Checking - STRICT MODE
+    // ===================================
+    "strict": true,                         // Enable all strict checks
+    "noImplicitAny": true,                  // No implicit 'any' types
+    "strictNullChecks": true,               // Strict null/undefined checks
+    "strictFunctionTypes": true,            // Strict function type checks
+    "strictBindCallApply": true,            // Strict bind/call/apply
+    "strictPropertyInitialization": true,   // Class properties must be initialized
+    "noImplicitThis": true,                 // No implicit 'this'
+    "alwaysStrict": true,                   // Parse in strict mode
+    
+    // ===================================
+    // Additional Checks
+    // ===================================
+    "noUnusedLocals": true,                 // Error on unused locals
+    "noUnusedParameters": true,             // Error on unused parameters
+    "noImplicitReturns": true,              // All code paths must return
+    "noFallthroughCasesInSwitch": true,     // No fallthrough in switch
+    "noUncheckedIndexedAccess": true,       // Check array/object access
+    
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "resolveJsonModule": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "prisma/src/generated/**/*"]
+}
