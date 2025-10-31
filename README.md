@@ -311,7 +311,8 @@ Interactive KYC is a working prototype demonstrated to sector stakeholders with 
 
 ## Demo Video
 
-Watch the demo on YouTube: https://youtu.be/Ad44riH5CgI?si=7QZl6KbmuON2DiJr
+Watch the demo on YouTube: https:[//youtu.be/Ad44riH5CgI?si=7QZl6KbmuON2DiJr](https://youtu.be/tO3fOZvSzaA)
+
 
 
 
