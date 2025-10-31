@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/Ad44riH5CgI?si=7QZl6KbmuON2DiJr" target="_blank">
+  <a href="https:[//youtu.be/Ad44riH5CgI?si=7QZl6KbmuON2DiJr](https://youtu.be/tO3fOZvSzaA)" target="_blank">
     <img src="https://img.youtube.com/vi/Ad44riH5CgI/hqdefault.jpg" alt="Demo Video" width="720" style="border-radius:12px" />
   </a>
   <br />
@@ -312,6 +312,7 @@ Interactive KYC is a working prototype demonstrated to sector stakeholders with 
 ## Demo Video
 
 Watch the demo on YouTube: https: [//youtu.be/Ad44riH5CgI?si=7QZl6KbmuON2DiJr](https://youtu.be/tO3fOZvSzaA)
+
 
 
 
