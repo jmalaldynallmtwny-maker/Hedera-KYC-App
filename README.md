@@ -1,6 +1,6 @@
 # Hedera-KYC-App
 <p align="center">
-  <img src="logo.png" alt="Interactive KYC" width="140" />
+  <img src="logo.png" alt="Interactive KYC" width="180" />
 </p>
 
 <p align="center">
@@ -312,5 +312,6 @@ Interactive KYC is a working prototype demonstrated to sector stakeholders with 
 ## Demo Video
 
 Watch the demo on YouTube: https://youtu.be/Ad44riH5CgI?si=7QZl6KbmuON2DiJr
+
 
 
