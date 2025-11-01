@@ -25,7 +25,7 @@
     <img src="https://img.youtube.com/vi/tO3fOZvSzaA/hqdefault.jpg" alt="Demo Video" width="720" style="border-radius:12px" />
   </a>
   <br />
-  <a href="https://youtu.be/tO3fOZvSzaA" target="_blank"><b>▶ Watch the 2‑minute demo</b></a>
+  <a href="https://youtu.be/tO3fOZvSzaA" target="_blank"><b>▶ Watch the demo on YouTube</b></a>
 </p>
 
 ## Overview
@@ -309,6 +309,3 @@ Interactive KYC is a working prototype demonstrated to sector stakeholders with 
 
 ---
 
-## Demo Video
-
-Watch the demo on YouTube: https: [//youtu.be/tO3fOZvSzaA](https://youtu.be/tO3fOZvSzaA)
