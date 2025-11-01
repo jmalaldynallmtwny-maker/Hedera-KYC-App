@@ -74,8 +74,8 @@ Banks save time, regulators gain real‑time insight, and users onboard faster �
 
 ## Architecture (v1)
 
-- Frontend: React + Vite + TypeScript — responsive Arabic/English UI.
-- Backend: Node.js + Prisma + PostgreSQL.
+- Frontend: React + Vite + TypeScript + Tailwind
+- Backend: Node.js-express.js + Prisma + PostgreSQL.
 - Jobs: Redis + BullMQ for async tasks (AI/ledger ops).
 - Storage: encrypted MinIO (S3‑compatible).
 - AI: Face embeddings + Whisper/LLM for analysis and verification.
@@ -308,4 +308,5 @@ If first‑run fails:
 Interactive KYC is a working prototype demonstrated to sector stakeholders with encouraging feedback. We are seeking pilot partnerships with banks and the Central Bank of Mauritania to validate the model and measure impact.
 
 ---
+
 
